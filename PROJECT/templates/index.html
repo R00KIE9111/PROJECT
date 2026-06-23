@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Panel Principal</title>
+</head>
+<body>
+    <h1>Bienvenido {{ usuario }}</h1>
+    <p>Tu rol: {{ rol }}</p>
+    {% if rol == "admin" %}
+        <h2>Menú Administrador</h2>
+        <ul>
+            <li><a href="{{ url_for('usuarios') }}">Gestión de Usuarios</a></li>
+            <li><a href="{{ url_for('equipos') }}">Gestión de Equipos</a></li>
+            <li><a href="{{ url_for('asignaciones') }}">Asignaciones</a></li>
+            <li><a href="{{ url_for('sucursales') }}">Sucursales</a></li>
+            <li><a href="{{ url_for('servicio') }}">Servicio Técnico</a></li>
+        </ul>
+    {% elif rol == "cliente" %}
+        <h2>Menú Cliente</h2>
+        <ul>
+            <li><a href="{{ url_for('mis_equipos') }}">Mis Equipos</a></li>
+            <li><a href="{{ url_for('mis_asignaciones') }}">Mis Asignaciones</a></li>
+        </ul>
+    {% elif rol == "analista" %}
+        <h2>Menú Analista de Auditoría</h2>
+        <ul>
+            <li><a href="{{ url_for('reportes') }}">Reportes de Auditoría</a></li>
+            <li><a href="{{ url_for('eventos') }}">Eventos en Cosmos DB</a></li>
+        </ul>
+    {% endif %}
+    <hr>
+    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Gestión de Equipos</title>
+</head>
+<body>
+    <h1>Equipos</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="{{ url_for('equipos') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Número de Serie:</label>
+        <input type="text" name="numero_serie" required><br>
+        <label>Marca:</label>
+        <input type="text" name="marca" required><br>
+        <label>Modelo:</label>
+        <input type="text" name="modelo" required><br>
+        <label>Tipo de Equipo:</label>
+        <input type="text" name="tipo_equipo" required><br>
+        <button type="submit">Crear Equipo</button>
+    </form>
+    <hr>
+    <h2>Lista de Equipos</h2>
+    <table border="1">
+        <tr>
+            <th>Número de Serie</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Tipo</th>
+            <th>Acciones</th>
+        </tr>
+        {% for e in equipos %}
+        <tr>
+            <td>{{ e.numero_serie }}</td>
+            <td>{{ e.marca }}</td>
+            <td>{{ e.modelo }}</td>
+            <td>{{ e.tipo_equipo }}</td>
+            <td>
+                <a href="{{ url_for('equipos_eliminar', numero_serie=e.numero_serie) }}">Eliminar</a>
+                <form method="POST" action="{{ url_for('equipos_editar', numero_serie=e.numero_serie) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="text" name="marca" value="{{ e.marca }}" required>
+                    <input type="text" name="modelo" value="{{ e.modelo }}" required>
+                    <input type="text" name="tipo_equipo" value="{{ e.tipo_equipo }}" required>
+                    <button type="submit">Editar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

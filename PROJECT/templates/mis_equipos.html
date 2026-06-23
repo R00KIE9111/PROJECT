@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Mis Equipos</title>
+</head>
+<body>
+    <h1>Mis Equipos</h1>
+    <table border="1">
+        <tr>
+            <th>Número de Serie</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Tipo</th>
+        </tr>
+        {% for e in equipos %}
+        <tr>
+            <td>{{ e.numero_serie }}</td>
+            <td>{{ e.marca }}</td>
+            <td>{{ e.modelo }}</td>
+            <td>{{ e.tipo_equipo }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

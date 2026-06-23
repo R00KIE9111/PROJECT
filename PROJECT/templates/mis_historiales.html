@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Mi Historial de Servicio</title>
+</head>
+<body>
+    <h1>Mi Historial de Servicio Técnico</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Número de Serie</th>
+            <th>Servicio Técnico</th>
+            <th>Fecha Entrega</th>
+            <th>Fecha Devolución</th>
+            <th>Motivo Falla</th>
+            <th>Empleado Servicio</th>
+        </tr>
+        {% for h in historial %}
+        <tr>
+            <td>{{ h.id_historial }}</td>
+            <td>{{ h.numero_serie }}</td>
+            <td>{{ h.servicio_tecnico }}</td>
+            <td>{{ h.fecha_entrega }}</td>
+            <td>{{ h.fecha_devolucion }}</td>
+            <td>{{ h.motivo_falla }}</td>
+            <td>{{ h.empleado_servicio }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
