@@ -1,0 +1,312 @@
+from database import *
+from models import *
+from werkzeug.security import generate_password_hash, check_password_hash
+
+def validar_login(rut, password):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Usuario.select_sql(), (rut,))
+    usuario = cursor.fetchone()
+    db.close()
+    if usuario and check_password_hash(usuario["password"], password):
+        registrar_evento(rut, "login", "Inicio de sesión exitoso")
+        return True
+    return False
+
+def resetear_password(rut, nueva_password):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Usuario.select_sql(), (rut,))
+    usuario = cursor.fetchone()
+    if not usuario:
+        db.close()
+        return False
+    hashed_pw = generate_password_hash(nueva_password)
+    cursor.execute("UPDATE Usuario SET password=%s WHERE rut_usuario=%s", (hashed_pw, rut))
+    db.commit()
+    db.close()
+    registrar_evento(rut, "reset_password", "Contraseña restablecida")
+    return True
+
+def crear_usuario(rut, nombre, password, rol="empleado"):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Usuario.select_sql(), (rut,))
+    existente = cursor.fetchone()
+    if existente:
+        db.close()
+        return False
+    hashed_pw = generate_password_hash(password)
+    usuario = Usuario(rut, nombre, hashed_pw, rol)
+    cursor.execute(Usuario.insert_sql(), (usuario.rut_usuario, usuario.nombre, usuario.password, usuario.rol))
+    db.commit()
+    db.close()
+    registrar_evento(rut, "crear_usuario", f"Usuario {nombre} creado")
+    return True
+
+def listar_usuarios():
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT rut_usuario, nombre, rol FROM Usuario")
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def eliminar_usuario(rut):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Usuario WHERE rut_usuario=%s", (rut,))
+    db.commit()
+    db.close()
+    registrar_evento(rut, "eliminar_usuario", f"Usuario {rut} eliminado")
+
+def editar_usuario(rut, nombre=None, password=None, rol=None):
+    db = conexion()
+    cursor = db.cursor()
+    if password:
+        password = generate_password_hash(password)
+        cursor.execute("UPDATE Usuario SET nombre=%s, password=%s, rol=%s WHERE rut_usuario=%s",
+                       (nombre, password, rol, rut))
+    else:
+        cursor.execute("UPDATE Usuario SET nombre=%s, rol=%s WHERE rut_usuario=%s",
+                       (nombre, rol, rut))
+    db.commit()
+    db.close()
+    registrar_evento(rut, "editar_usuario", f"Usuario {rut} editado")
+
+def crear_equipo(numero_serie, marca, modelo, tipo_equipo):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Equipo.select_sql(), (numero_serie,))
+    existente = cursor.fetchone()
+    if existente:
+        db.close()
+        return False
+    equipo = Equipo(numero_serie, marca, modelo, tipo_equipo)
+    cursor.execute(Equipo.insert_sql(), (equipo.numero_serie, equipo.marca, equipo.modelo, equipo.tipo_equipo))
+    db.commit()
+    db.close()
+    registrar_evento(numero_serie, "crear_equipo", f"Equipo {marca} {modelo} creado")
+    return True
+
+def listar_equipos():
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT numero_serie, marca, modelo, tipo_equipo FROM Equipo")
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def eliminar_equipo(numero_serie):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Equipo WHERE numero_serie=%s", (numero_serie,))
+    db.commit()
+    db.close()
+    registrar_evento(numero_serie, "eliminar_equipo", f"Equipo {numero_serie} eliminado")
+
+def editar_equipo(numero_serie, marca, modelo, tipo_equipo):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("UPDATE Equipo SET marca=%s, modelo=%s, tipo_equipo=%s WHERE numero_serie=%s",
+                   (marca, modelo, tipo_equipo, numero_serie))
+    db.commit()
+    db.close()
+    registrar_evento(numero_serie, "editar_equipo", f"Equipo {numero_serie} editado")
+
+def crear_asignacion(rut_usuario, numero_serie, fecha_entrega, fecha_devolucion=None):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Usuario.select_sql(), (rut_usuario,))
+    usuario = cursor.fetchone()
+    if not usuario:
+        db.close()
+        return False
+    cursor.execute(Equipo.select_sql(), (numero_serie,))
+    equipo = cursor.fetchone()
+    if not equipo:
+        db.close()
+        return False
+
+    asignacion = AsignacionEquipo(rut_usuario, numero_serie, fecha_entrega, fecha_devolucion)
+    cursor.execute(AsignacionEquipo.insert_sql(),
+                   (asignacion.rut_usuario, asignacion.numero_serie,
+                    asignacion.fecha_entrega, asignacion.fecha_devolucion))
+    db.commit()
+    db.close()
+    registrar_evento(rut_usuario, "crear_asignacion", f"Equipo {numero_serie} asignado")
+    return True
+
+def listar_asignaciones():
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT rut_usuario, numero_serie, fecha_entrega, fecha_devolucion FROM AsignacionEquipo")
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def eliminar_asignacion(rut_usuario, numero_serie):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM AsignacionEquipo WHERE rut_usuario=%s AND numero_serie=%s", (rut_usuario, numero_serie))
+    db.commit()
+    db.close()
+    registrar_evento(rut_usuario, "eliminar_asignacion", f"Equipo {numero_serie} devuelto")
+
+def crear_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Sucursal.select_sql(), (id_sucursal,))
+    existente = cursor.fetchone()
+    if existente:
+        db.close()
+        return False
+    sucursal = Sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad)
+    cursor.execute(Sucursal.insert_sql(),
+                   (sucursal.id_sucursal, sucursal.correlativo, sucursal.direccion,
+                    sucursal.telefono, sucursal.id_empresa, sucursal.id_ciudad))
+    db.commit()
+    db.close()
+    registrar_evento(id_sucursal, "crear_sucursal", f"Sucursal {direccion} creada")
+    return True
+
+def listar_sucursales():
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad FROM Sucursal")
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def eliminar_sucursal(id_sucursal):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Sucursal WHERE id_sucursal=%s", (id_sucursal,))
+    db.commit()
+    db.close()
+    registrar_evento(id_sucursal, "eliminar_sucursal", f"Sucursal {id_sucursal} eliminada")
+
+def editar_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("""UPDATE Sucursal 
+                      SET correlativo=%s, direccion=%s, telefono=%s, id_empresa=%s, id_ciudad=%s 
+                      WHERE id_sucursal=%s""",
+                   (correlativo, direccion, telefono, id_empresa, id_ciudad, id_sucursal))
+    db.commit()
+    db.close()
+    registrar_evento(id_sucursal, "editar_sucursal", f"Sucursal {id_sucursal} editada")
+
+def crear_servicio(codigo, nombre_empresa):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(ServicioTecnico.select_sql(), (codigo,))
+    existente = cursor.fetchone()
+    if existente:
+        db.close()
+        return False
+    servicio = ServicioTecnico(codigo, nombre_empresa)
+    cursor.execute(ServicioTecnico.insert_sql(), (servicio.codigo, servicio.nombre_empresa))
+    db.commit()
+    db.close()
+    registrar_evento(codigo, "crear_servicio", f"Servicio técnico {nombre_empresa} creado")
+    return True
+
+def listar_servicios():
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT codigo, nombre_empresa FROM ServicioTecnico")
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def eliminar_servicio(codigo):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM ServicioTecnico WHERE codigo=%s", (codigo,))
+    db.commit()
+    db.close()
+    registrar_evento(codigo, "eliminar_servicio", f"Servicio técnico {codigo} eliminado")
+
+def editar_servicio(codigo, nombre_empresa):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("UPDATE ServicioTecnico SET nombre_empresa=%s WHERE codigo=%s", (nombre_empresa, codigo))
+    db.commit()
+    db.close()
+    registrar_evento(codigo, "editar_servicio", f"Servicio técnico {codigo} editado")
+
+def crear_historial(id_historial, numero_serie, servicio_tecnico, fecha_entrega, fecha_devolucion, motivo_falla, empleado_servicio):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(Equipo.select_sql(), (numero_serie,))
+    equipo = cursor.fetchone()
+    if not equipo:
+        db.close()
+        return False
+    historial = HistorialServicio(id_historial, numero_serie, servicio_tecnico, fecha_entrega, fecha_devolucion, motivo_falla, empleado_servicio)
+    cursor.execute(HistorialServicio.insert_sql(),
+                   (historial.id_historial, historial.numero_serie, historial.servicio_tecnico,
+                    historial.fecha_entrega, historial.fecha_devolucion, historial.motivo_falla, historial.empleado_servicio))
+    db.commit()
+    db.close()
+    registrar_evento(numero_serie, "crear_historial", f"Equipo {numero_serie} enviado a servicio técnico")
+    return True
+
+def listar_historial():
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT id_historial, numero_serie, servicio_tecnico, fecha_entrega, fecha_devolucion, motivo_falla, empleado_servicio FROM HistorialServicio")
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def eliminar_historial(id_historial):
+    db = conexion()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM HistorialServicio WHERE id_historial=%s", (id_historial,))
+    db.commit()
+    db.close()
+    registrar_evento(id_historial, "eliminar_historial", f"Historial {id_historial} eliminado")
+
+def mis_equipos(rut_usuario):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""SELECT e.numero_serie, e.marca, e.modelo, e.tipo_equipo
+                      FROM Equipo e
+                      JOIN AsignacionEquipo a ON e.numero_serie = a.numero_serie
+                      WHERE a.rut_usuario=%s""", (rut_usuario,))
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def mis_asignaciones(rut_usuario):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT numero_serie, fecha_entrega, fecha_devolucion FROM AsignacionEquipo WHERE rut_usuario=%s", (rut_usuario,))
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def mis_historiales(rut_usuario):
+    db = conexion()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""SELECT h.id_historial, h.numero_serie, h.servicio_tecnico, h.fecha_entrega, h.fecha_devolucion, h.motivo_falla, h.empleado_servicio
+                      FROM HistorialServicio h
+                      JOIN AsignacionEquipo a ON h.numero_serie = a.numero_serie
+                      WHERE a.rut_usuario=%s""", (rut_usuario,))
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def listar_eventos():
+    items = container.read_all_items()
+    eventos = []
+    for item in items:
+        eventos.append({
+            "usuario": item.get("usuario"),
+            "accion": item.get("accion"),
+            "detalle": item.get("detalle"),
+            "resultado": item.get("resultado")
+        })
+    return eventos

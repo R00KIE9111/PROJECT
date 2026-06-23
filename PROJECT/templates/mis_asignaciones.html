@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Mis Asignaciones</title>
+</head>
+<body>
+    <h1>Mis Asignaciones</h1>
+    <table border="1">
+        <tr>
+            <th>Número de Serie</th>
+            <th>Fecha Entrega</th>
+            <th>Fecha Devolución</th>
+        </tr>
+        {% for a in asignaciones %}
+        <tr>
+            <td>{{ a.numero_serie }}</td>
+            <td>{{ a.fecha_entrega }}</td>
+            <td>{{ a.fecha_devolucion }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
