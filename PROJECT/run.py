@@ -31,6 +31,25 @@ def logout():
     session.pop("usuario", None)
     return redirect(url_for("login"))
 
+@app.route("/auditoria")
+def auditoria_view():
+    if "usuario" not in session or session["rol"] != "analista":
+        return redirect(url_for("login"))
+    eventos = listar_eventos()
+    historial = []
+    for e in eventos:
+        historial.append({
+            "id_historial": e.get("id", ""),
+            "numero_serie": e.get("usuario", ""),
+            "servicio_tecnico": e.get("accion", ""),
+            "fecha_entrega": e.get("detalle", ""),
+            "fecha_devolucion": e.get("resultado", ""),
+            "motivo_falla": "",
+            "empleado_servicio": ""
+        })
+    return render_template("mis_historiales.html", historial=historial)
+
+
 @app.route("/usuarios", methods=["GET", "POST"])
 def usuarios():
     if "usuario" not in session:
