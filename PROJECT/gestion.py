@@ -140,7 +140,12 @@ def crear_asignacion(rut_usuario, numero_serie, fecha_entrega, fecha_devolucion=
 def listar_asignaciones():
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT rut_usuario, numero_serie, fecha_entrega, fecha_devolucion FROM AsignacionEquipo")
+    cursor.execute("""
+        SELECT a.rut_usuario, u.nombre, e.marca, e.modelo, a.fecha_entrega, a.fecha_devolucion
+        FROM AsignacionEquipo a
+        JOIN Usuario u ON a.rut_usuario = u.rut_usuario
+        JOIN Equipo e ON a.numero_serie = e.numero_serie
+    """)
     lista = cursor.fetchall()
     db.close()
     return lista
@@ -173,7 +178,13 @@ def crear_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id
 def listar_sucursales():
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad FROM Sucursal")
+    cursor.execute("""
+        SELECT s.id_sucursal, s.correlativo, s.direccion, s.telefono,
+               e.nombre AS empresa, c.nombre AS ciudad
+        FROM Sucursal s
+        JOIN Empresa e ON s.id_empresa = e.id_empresa
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+    """)
     lista = cursor.fetchall()
     db.close()
     return lista
@@ -256,7 +267,13 @@ def crear_historial(id_historial, numero_serie, servicio_tecnico, fecha_entrega,
 def listar_historial():
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT id_historial, numero_serie, servicio_tecnico, fecha_entrega, fecha_devolucion, motivo_falla, empleado_servicio FROM HistorialServicio")
+    cursor.execute("""
+        SELECT h.id_historial, e.marca, e.modelo, s.nombre_empresa,
+               h.fecha_entrega, h.fecha_devolucion, h.motivo_falla, h.empleado_servicio
+        FROM HistorialServicio h
+        JOIN Equipo e ON h.numero_serie = e.numero_serie
+        JOIN ServicioTecnico s ON h.servicio_tecnico = s.codigo
+    """)
     lista = cursor.fetchall()
     db.close()
     return lista
