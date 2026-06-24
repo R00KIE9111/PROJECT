@@ -289,10 +289,12 @@ def eliminar_historial(id_historial):
 def mis_equipos(rut_usuario):
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("""SELECT e.numero_serie, e.marca, e.modelo, e.tipo_equipo
-                      FROM Equipo e
-                      JOIN AsignacionEquipo a ON e.numero_serie = a.numero_serie
-                      WHERE a.rut_usuario=%s""", (rut_usuario,))
+    cursor.execute("""
+        SELECT e.numero_serie, e.marca, e.modelo, e.tipo_equipo
+        FROM Equipo e
+        JOIN AsignacionEquipo a ON e.numero_serie = a.numero_serie
+        WHERE a.rut_usuario=%s
+    """, (rut_usuario,))
     lista = cursor.fetchall()
     db.close()
     return lista
@@ -300,7 +302,12 @@ def mis_equipos(rut_usuario):
 def mis_asignaciones(rut_usuario):
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("SELECT numero_serie, fecha_entrega, fecha_devolucion FROM AsignacionEquipo WHERE rut_usuario=%s", (rut_usuario,))
+    cursor.execute("""
+        SELECT a.numero_serie, e.marca, e.modelo, a.fecha_entrega, a.fecha_devolucion
+        FROM AsignacionEquipo a
+        JOIN Equipo e ON a.numero_serie = e.numero_serie
+        WHERE a.rut_usuario=%s
+    """, (rut_usuario,))
     lista = cursor.fetchall()
     db.close()
     return lista
@@ -308,10 +315,15 @@ def mis_asignaciones(rut_usuario):
 def mis_historiales(rut_usuario):
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
-    cursor.execute("""SELECT h.id_historial, h.numero_serie, h.servicio_tecnico, h.fecha_entrega, h.fecha_devolucion, h.motivo_falla, h.empleado_servicio
-                      FROM HistorialServicio h
-                      JOIN AsignacionEquipo a ON h.numero_serie = a.numero_serie
-                      WHERE a.rut_usuario=%s""", (rut_usuario,))
+    cursor.execute("""
+        SELECT h.id_historial, e.marca, e.modelo, s.nombre_empresa AS servicio_tecnico,
+               h.fecha_entrega, h.fecha_devolucion, h.motivo_falla, h.empleado_servicio
+        FROM HistorialServicio h
+        JOIN AsignacionEquipo a ON h.numero_serie = a.numero_serie
+        JOIN Equipo e ON h.numero_serie = e.numero_serie
+        JOIN ServicioTecnico s ON h.servicio_tecnico = s.codigo
+        WHERE a.rut_usuario=%s
+    """, (rut_usuario,))
     lista = cursor.fetchall()
     db.close()
     return lista
