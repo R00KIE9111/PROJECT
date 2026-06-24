@@ -18,7 +18,7 @@
             <li><a href="{{ url_for('sucursales') }}">Sucursales</a></li>
             <li><a href="{{ url_for('servicio') }}">Servicio Técnico</a></li>
         </ul>
-    {% elif rol == "cliente" %}
+    {% elif rol == "empleado" %}
         <h2>Menú Cliente</h2>
         <ul>
             <li><a href="{{ url_for('mis_equipos') }}">Mis Equipos</a></li>
