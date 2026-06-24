@@ -1,10 +1,10 @@
 from database import *
 from models import *
+import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
-
 def validar_login(rut, password):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Usuario.select_sql(), (rut,))
     usuario = cursor.fetchone()
     db.close()
@@ -15,7 +15,7 @@ def validar_login(rut, password):
 
 def resetear_password(rut, nueva_password):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Usuario.select_sql(), (rut,))
     usuario = cursor.fetchone()
     if not usuario:
@@ -30,7 +30,7 @@ def resetear_password(rut, nueva_password):
 
 def crear_usuario(rut, nombre, password, rol="empleado"):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Usuario.select_sql(), (rut,))
     existente = cursor.fetchone()
     if existente:
@@ -46,7 +46,7 @@ def crear_usuario(rut, nombre, password, rol="empleado"):
 
 def listar_usuarios():
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT rut_usuario, nombre, rol FROM Usuario")
     lista = cursor.fetchall()
     db.close()
@@ -54,7 +54,7 @@ def listar_usuarios():
 
 def eliminar_usuario(rut):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("DELETE FROM Usuario WHERE rut_usuario=%s", (rut,))
     db.commit()
     db.close()
@@ -62,7 +62,7 @@ def eliminar_usuario(rut):
 
 def editar_usuario(rut, nombre=None, password=None, rol=None):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     if password:
         password = generate_password_hash(password)
         cursor.execute("UPDATE Usuario SET nombre=%s, password=%s, rol=%s WHERE rut_usuario=%s",
@@ -76,7 +76,7 @@ def editar_usuario(rut, nombre=None, password=None, rol=None):
 
 def crear_equipo(numero_serie, marca, modelo, tipo_equipo):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Equipo.select_sql(), (numero_serie,))
     existente = cursor.fetchone()
     if existente:
@@ -91,7 +91,7 @@ def crear_equipo(numero_serie, marca, modelo, tipo_equipo):
 
 def listar_equipos():
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT numero_serie, marca, modelo, tipo_equipo FROM Equipo")
     lista = cursor.fetchall()
     db.close()
@@ -99,7 +99,7 @@ def listar_equipos():
 
 def eliminar_equipo(numero_serie):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("DELETE FROM Equipo WHERE numero_serie=%s", (numero_serie,))
     db.commit()
     db.close()
@@ -107,7 +107,7 @@ def eliminar_equipo(numero_serie):
 
 def editar_equipo(numero_serie, marca, modelo, tipo_equipo):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("UPDATE Equipo SET marca=%s, modelo=%s, tipo_equipo=%s WHERE numero_serie=%s",
                    (marca, modelo, tipo_equipo, numero_serie))
     db.commit()
@@ -116,7 +116,7 @@ def editar_equipo(numero_serie, marca, modelo, tipo_equipo):
 
 def crear_asignacion(rut_usuario, numero_serie, fecha_entrega, fecha_devolucion=None):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Usuario.select_sql(), (rut_usuario,))
     usuario = cursor.fetchone()
     if not usuario:
@@ -139,7 +139,7 @@ def crear_asignacion(rut_usuario, numero_serie, fecha_entrega, fecha_devolucion=
 
 def listar_asignaciones():
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT rut_usuario, numero_serie, fecha_entrega, fecha_devolucion FROM AsignacionEquipo")
     lista = cursor.fetchall()
     db.close()
@@ -147,7 +147,7 @@ def listar_asignaciones():
 
 def eliminar_asignacion(rut_usuario, numero_serie):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("DELETE FROM AsignacionEquipo WHERE rut_usuario=%s AND numero_serie=%s", (rut_usuario, numero_serie))
     db.commit()
     db.close()
@@ -155,7 +155,7 @@ def eliminar_asignacion(rut_usuario, numero_serie):
 
 def crear_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Sucursal.select_sql(), (id_sucursal,))
     existente = cursor.fetchone()
     if existente:
@@ -172,7 +172,7 @@ def crear_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id
 
 def listar_sucursales():
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad FROM Sucursal")
     lista = cursor.fetchall()
     db.close()
@@ -180,7 +180,7 @@ def listar_sucursales():
 
 def eliminar_sucursal(id_sucursal):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("DELETE FROM Sucursal WHERE id_sucursal=%s", (id_sucursal,))
     db.commit()
     db.close()
@@ -188,7 +188,7 @@ def eliminar_sucursal(id_sucursal):
 
 def editar_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, id_ciudad):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("""UPDATE Sucursal 
                       SET correlativo=%s, direccion=%s, telefono=%s, id_empresa=%s, id_ciudad=%s 
                       WHERE id_sucursal=%s""",
@@ -199,7 +199,7 @@ def editar_sucursal(id_sucursal, correlativo, direccion, telefono, id_empresa, i
 
 def crear_servicio(codigo, nombre_empresa):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(ServicioTecnico.select_sql(), (codigo,))
     existente = cursor.fetchone()
     if existente:
@@ -214,7 +214,7 @@ def crear_servicio(codigo, nombre_empresa):
 
 def listar_servicios():
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT codigo, nombre_empresa FROM ServicioTecnico")
     lista = cursor.fetchall()
     db.close()
@@ -222,7 +222,7 @@ def listar_servicios():
 
 def eliminar_servicio(codigo):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("DELETE FROM ServicioTecnico WHERE codigo=%s", (codigo,))
     db.commit()
     db.close()
@@ -230,7 +230,7 @@ def eliminar_servicio(codigo):
 
 def editar_servicio(codigo, nombre_empresa):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("UPDATE ServicioTecnico SET nombre_empresa=%s WHERE codigo=%s", (nombre_empresa, codigo))
     db.commit()
     db.close()
@@ -238,7 +238,7 @@ def editar_servicio(codigo, nombre_empresa):
 
 def crear_historial(id_historial, numero_serie, servicio_tecnico, fecha_entrega, fecha_devolucion, motivo_falla, empleado_servicio):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Equipo.select_sql(), (numero_serie,))
     equipo = cursor.fetchone()
     if not equipo:
@@ -255,7 +255,7 @@ def crear_historial(id_historial, numero_serie, servicio_tecnico, fecha_entrega,
 
 def listar_historial():
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT id_historial, numero_serie, servicio_tecnico, fecha_entrega, fecha_devolucion, motivo_falla, empleado_servicio FROM HistorialServicio")
     lista = cursor.fetchall()
     db.close()
@@ -263,7 +263,7 @@ def listar_historial():
 
 def eliminar_historial(id_historial):
     db = conexion()
-    cursor = db.cursor()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("DELETE FROM HistorialServicio WHERE id_historial=%s", (id_historial,))
     db.commit()
     db.close()
@@ -271,7 +271,7 @@ def eliminar_historial(id_historial):
 
 def mis_equipos(rut_usuario):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("""SELECT e.numero_serie, e.marca, e.modelo, e.tipo_equipo
                       FROM Equipo e
                       JOIN AsignacionEquipo a ON e.numero_serie = a.numero_serie
@@ -282,7 +282,7 @@ def mis_equipos(rut_usuario):
 
 def mis_asignaciones(rut_usuario):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("SELECT numero_serie, fecha_entrega, fecha_devolucion FROM AsignacionEquipo WHERE rut_usuario=%s", (rut_usuario,))
     lista = cursor.fetchall()
     db.close()
@@ -290,7 +290,7 @@ def mis_asignaciones(rut_usuario):
 
 def mis_historiales(rut_usuario):
     db = conexion()
-    cursor = db.cursor(dictionary=True)
+    cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute("""SELECT h.id_historial, h.numero_serie, h.servicio_tecnico, h.fecha_entrega, h.fecha_devolucion, h.motivo_falla, h.empleado_servicio
                       FROM HistorialServicio h
                       JOIN AsignacionEquipo a ON h.numero_serie = a.numero_serie
