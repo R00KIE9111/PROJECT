@@ -1,5 +1,6 @@
 import pymysql
 from azure.cosmos import CosmosClient
+import uuid
 
 #COSMO DB
 COSMOS_ENDPOINT = "https://eva3-aws-azure.documents.azure.com/"
@@ -22,7 +23,7 @@ def conexion():
 #FUNCIONES
 def registrar_evento(usuario, accion, detalle, resultado="OK"):
     evento = {
-        "id": f"{usuario}_{accion}_{detalle}",
+        "id": str(uuid.uuid4()),
         "usuario": usuario,
         "accion": accion,
         "detalle": detalle,
