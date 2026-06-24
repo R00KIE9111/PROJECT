@@ -2,10 +2,10 @@ import pymysql
 from azure.cosmos import CosmosClient
 
 #COSMO DB
-COSMOS_ENDPOINT = ""
-COSMOS_KEY = ""
-DATABASE_NAME = ""
-CONTAINER_NAME = ""
+COSMOS_ENDPOINT = "https://eva3-aws-azure.documents.azure.com/"
+COSMOS_KEY = "SPtw9GduUqydI6HtdSgHkAE1AN1mhQGmQXqflZp5uWgrejwmlWHHVtkE7xGzqodNhxjCnoQdr8slACDbtmXN8w=="
+DATABASE_NAME = "eva3-aws-azure"
+CONTAINER_NAME = "container1"
 cosmos_client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
 database = cosmos_client.get_database_client(DATABASE_NAME)
 container = database.get_container_client(CONTAINER_NAME)
