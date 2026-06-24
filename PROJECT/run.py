@@ -226,4 +226,4 @@ def mis_historiales_view():
     return render_template("mis_historiales.html", historial=lista)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
