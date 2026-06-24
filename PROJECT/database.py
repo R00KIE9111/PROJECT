@@ -16,7 +16,7 @@ def conexion():
     return pymysql.connect(
         host="eva3-aws-azure-db.c7saowikmas3.us-east-1.rds.amazonaws.com",
         user="admin",
-        password="Inacap.2026",
+        password="kt7GphhcBsqf.",
         database="project"
     )
 
