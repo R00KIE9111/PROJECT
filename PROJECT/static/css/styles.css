@@ -1,69 +1,252 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+:root {
+    --bg-dark: #0f172a;
+    --bg-card: rgba(30, 41, 59, 0.7);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary: #0ea5e9;
+    --primary-hover: #0284c7;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --glow: rgba(14, 165, 233, 0.5);
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f9;
-    margin: 20px;
-    color: #333;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    background-image: radial-gradient(circle at top right, #1e293b, transparent 400px);
+    background-attachment: fixed;
+    margin: 0;
+    padding: 40px 20px;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
 }
 
-h1, h2 {
-    color: #2c3e50;
-}
-
-form {
-    background: #ffffff;
-    padding: 15px;
+h1, h2, h3 {
+    color: var(--text-main);
+    font-weight: 600;
     margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+/* Formularios - Glassmorphism */
+form {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 450px;
+    box-sizing: border-box;
 }
 
 form label {
     display: block;
-    margin-top: 10px;
-    font-weight: bold;
+    margin-top: 15px;
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
 
-form input, form select, form button {
-    margin-top: 5px;
-    padding: 8px;
+form input, form select {
+    margin-top: 8px;
+    padding: 12px;
     width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    box-sizing: border-box;
+    background: #0f172a;
+    color: var(--text-main);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
 }
 
-button {
-    background-color: #3498db;
+form input:focus, form select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--glow);
+}
+
+/* Botones */
+button, .btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     color: white;
     border: none;
+    padding: 12px 20px;
+    margin-top: 25px;
+    width: 100%;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    box-sizing: border-box;
 }
 
-button:hover {
-    background-color: #2980b9;
+button:hover, .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--glow);
 }
 
+/* Enlaces */
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #38bdf8;
+    text-decoration: underline;
+}
+
+/* Botón Volver a inicio */
+.btn-back {
+    display: inline-block;
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border-color: var(--text-muted);
+    text-decoration: none;
+}
+
+/* Enlaces de Acción (Eliminar) */
+td a {
+    color: var(--danger);
+    font-weight: 600;
+}
+td a:hover {
+    color: var(--danger-hover);
+}
+
+/* Tablas */
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background: #fff;
+    max-width: 1000px;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    background: var(--bg-card);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 table th, table td {
-    border: 1px solid #ddd;
-    padding: 10px;
+    padding: 15px;
     text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 table th {
-    background-color: #3498db;
-    color: white;
+    background-color: rgba(15, 23, 42, 0.8);
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
 }
 
-table tr:nth-child(even) {
-    background-color: #f9f9f9;
+table tr:last-child td {
+    border-bottom: none;
+}
+
+table tr {
+    transition: background-color 0.2s ease;
+}
+
+table tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Tablas - formularios inline */
+td form {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+td form input, td form select {
+    margin-top: 0;
+    padding: 6px 10px;
+}
+td form button {
+    margin-top: 0;
+    width: auto;
+    padding: 6px 15px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+    width: 100%;
+    max-width: 1000px;
+    margin: 40px 0;
 }
 
 p[style="color:red;"] {
-    font-weight: bold;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger) !important;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    text-align: center;
+}
+
+/* Dashboard List */
+ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 400px;
+}
+ul li {
+    margin-bottom: 15px;
+}
+ul li a {
+    display: block;
+    padding: 15px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-main);
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+ul li a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    text-decoration: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
