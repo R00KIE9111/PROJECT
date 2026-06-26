@@ -96,11 +96,12 @@ def usuarios_editar(rut):
 def olvide():
     if request.method == "POST":
         rut = request.form["rut"]
+        email = request.form["email"]
         nueva_password = request.form["nueva_password"]
-        if resetear_password(rut, nueva_password):
+        if resetear_password(rut, email, nueva_password):
             return redirect(url_for("login"))
         else:
-            return render_template("olvide.html", error="Usuario no encontrado")
+            return render_template("olvide.html", error="Usuario no encontrado o correo incorrecto")
     return render_template("olvide.html")
 
 @app.route("/equipos", methods=["GET", "POST"])
@@ -239,21 +240,21 @@ def historial_eliminar(id_historial):
 
 @app.route("/mis_equipos")
 def mis_equipos_view():
-    if "usuario" not in session or session["rol"] != "cliente":
+    if "usuario" not in session or session["rol"] != "empleado":
         return redirect(url_for("login"))
     lista = mis_equipos(session["usuario"])
     return render_template("mis_equipos.html", equipos=lista)
 
 @app.route("/mis_asignaciones")
 def mis_asignaciones_view():
-    if "usuario" not in session or session["rol"] != "cliente":
+    if "usuario" not in session or session["rol"] != "empleado":
         return redirect(url_for("login"))
     lista = mis_asignaciones(session["usuario"])
     return render_template("mis_asignaciones.html", asignaciones=lista)
 
 @app.route("/mis_historiales")
 def mis_historiales_view():
-    if "usuario" not in session or session["rol"] != "cliente":
+    if "usuario" not in session or session["rol"] != "empleado":
         return redirect(url_for("login"))
     lista = mis_historiales(session["usuario"])
     return render_template("mis_historiales.html", historial=lista)

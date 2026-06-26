@@ -14,12 +14,12 @@ def validar_login(rut, password):
         return usuario
     return None
 
-def resetear_password(rut, nueva_password):
+def resetear_password(rut, email, nueva_password):
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
     cursor.execute(Usuario.select_sql(), (rut,))
     usuario = cursor.fetchone()
-    if not usuario:
+    if not usuario or usuario.get("email") != email:
         db.close()
         return False
     hashed_pw = generate_password_hash(nueva_password)
