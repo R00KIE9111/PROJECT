@@ -21,8 +21,8 @@
     {% elif rol == "empleado" %}
         <h2>Menú Cliente</h2>
         <ul>
-            <li><a href="{{ url_for('mis_equipos') }}">Mis Equipos</a></li>
-            <li><a href="{{ url_for('mis_asignaciones') }}">Mis Asignaciones</a></li>
+            <li><a href="{{ url_for('mis_equipos_view') }}">Mis Equipos</a></li>
+            <li><a href="{{ url_for('mis_asignaciones_view') }}">Mis Asignaciones</a></li>
         </ul>
     {% elif rol == "analista" %}
         <h2>Menú Analista de Auditoría</h2>
