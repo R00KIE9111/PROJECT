@@ -2,6 +2,7 @@ from database import *
 from models import *
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
+
 def validar_login(rut, password):
     db = conexion()
     cursor = db.cursor(pymysql.cursors.DictCursor)
@@ -38,7 +39,8 @@ def crear_usuario(rut, nombre, password, rol="empleado"):
         return False
     hashed_pw = generate_password_hash(password)
     usuario = Usuario(rut, nombre, hashed_pw, rol)
-    cursor.execute(Usuario.insert_sql(), (usuario.rut_usuario, usuario.nombre, usuario.password, usuario.rol))
+    cursor.execute("INSERT INTO Usuario (rut_usuario, nombre, password, rol) VALUES (%s, %s, %s, %s)", 
+                   (usuario.rut_usuario, usuario.nombre, usuario.password, usuario.rol))
     db.commit()
     db.close()
     registrar_evento(rut, "crear_usuario", f"Usuario {nombre} creado")
@@ -83,7 +85,8 @@ def crear_equipo(numero_serie, marca, modelo, tipo_equipo):
         db.close()
         return False
     equipo = Equipo(numero_serie, marca, modelo, tipo_equipo)
-    cursor.execute(Equipo.insert_sql(), (equipo.numero_serie, equipo.marca, equipo.modelo, equipo.tipo_equipo))
+    cursor.execute("INSERT INTO Equipo (numero_serie, marca, modelo, tipo_equipo) VALUES (%s, %s, %s, %s)", 
+                   (equipo.numero_serie, equipo.marca, equipo.modelo, equipo.tipo_equipo))
     db.commit()
     db.close()
     registrar_evento(numero_serie, "crear_equipo", f"Equipo {marca} {modelo} creado")
@@ -182,8 +185,8 @@ def listar_sucursales():
         SELECT s.id_sucursal, s.correlativo, s.direccion, s.telefono,
                e.nombre AS empresa, c.nombre AS ciudad
         FROM Sucursal s
-        JOIN Empresa e ON s.id_empresa = e.id_empresa
-        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        LEFT JOIN Empresa e ON s.id_empresa = e.id_empresa
+        LEFT JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
     """)
     lista = cursor.fetchall()
     db.close()
@@ -339,3 +342,163 @@ def listar_eventos():
             "resultado": item.get("resultado")
         })
     return eventos
+
+# --- REQUERIMIENTOS DEL SISTEMA (CONSULTAS) ---
+
+def req1_notebooks_chile():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT DISTINCT e.marca, e.modelo 
+        FROM Equipo e
+        LEFT JOIN TipoEquipo te ON e.codigo_tipo_equipo = te.codigo
+        JOIN AsignacionEquipo ae ON e.numero_serie = ae.numero_serie
+        JOIN Usuario u ON ae.rut_usuario = u.rut_usuario
+        JOIN Sucursal s ON u.id_sucursal = s.id_sucursal
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        JOIN Pais p ON c.id_pais = p.codigo
+        WHERE (e.tipo_equipo LIKE '%notebook%' OR te.nombre LIKE '%notebook%')
+          AND p.nombre = 'Chile'
+    """)
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def req2_empleados_metso_antofagasta():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT u.rut_usuario, u.nombre, u.apellido_paterno, u.apellido_materno
+        FROM Usuario u
+        JOIN Area ar ON u.id_area = ar.codigo
+        JOIN Empresa emp ON ar.id_empresa = emp.id_empresa
+        JOIN Sucursal s ON u.id_sucursal = s.id_sucursal
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        JOIN Pais p ON c.id_pais = p.codigo
+        WHERE (ar.nombre = 'Recursos humanos' OR ar.nombre = 'Prevención de riesgos')
+          AND emp.nombre = 'Metso Minerals'
+          AND p.nombre = 'Chile'
+          AND c.nombre = 'Antofagasta'
+          AND s.direccion LIKE '%General Velázquez #452%'
+    """)
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def req3_celular_samsung_calama():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT DISTINCT u.rut_usuario, u.nombre, u.apellido_paterno
+        FROM Usuario u
+        JOIN AsignacionEquipo ae ON u.rut_usuario = ae.rut_usuario
+        JOIN Equipo e ON ae.numero_serie = e.numero_serie
+        JOIN Sucursal s ON u.id_sucursal = s.id_sucursal
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        WHERE (e.tipo_equipo LIKE '%Celular%' OR e.codigo_tipo_equipo IN (SELECT codigo FROM TipoEquipo WHERE nombre LIKE '%Celular%'))
+          AND e.marca = 'Samsung'
+          AND e.modelo = 'S3'
+          AND c.nombre = 'Calama'
+    """)
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def req4_equipos_tony_stark():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT e.numero_serie, e.marca, e.modelo, e.tipo_equipo
+        FROM Equipo e
+        JOIN AsignacionEquipo ae ON e.numero_serie = ae.numero_serie
+        JOIN Usuario u ON ae.rut_usuario = u.rut_usuario
+        WHERE u.nombre = 'Tony Stark'
+    """)
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def req5_cantidad_sucursales_metso_antofagasta():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT COUNT(s.id_sucursal) as total
+        FROM Sucursal s
+        JOIN Empresa emp ON s.id_empresa = emp.id_empresa
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        WHERE emp.nombre = 'Metso Minerals' AND c.nombre = 'Antofagasta'
+    """)
+    resultado = cursor.fetchone()
+    db.close()
+    return resultado["total"] if resultado else 0
+
+def req6_usuarios_mayores_50_bhp_informatica():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT COUNT(u.rut_usuario) as total
+        FROM Usuario u
+        JOIN Area ar ON u.id_area = ar.codigo
+        JOIN Empresa emp ON ar.id_empresa = emp.id_empresa
+        WHERE u.edad > 50 
+          AND ar.nombre = 'Informática'
+          AND emp.nombre = 'BHP Billiton'
+    """)
+    resultado = cursor.fetchone()
+    db.close()
+    return resultado["total"] if resultado else 0
+
+def req7_empleados_bhp_ciudad(nombre_ciudad):
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT u.rut_usuario, u.nombre, u.apellido_paterno
+        FROM Usuario u
+        JOIN Sucursal s ON u.id_sucursal = s.id_sucursal
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        JOIN Empresa emp ON s.id_empresa = emp.id_empresa
+        WHERE emp.nombre = 'BHP Billiton' AND c.nombre = %s
+    """, (nombre_ciudad,))
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def req8_equipos_servicio_metso_antofagasta():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT e.tipo_equipo, e.modelo, e.marca,
+               h.fecha_entrega, h.fecha_devolucion as fecha_devolucion_estimada, h.motivo_falla, h.empleado_servicio
+        FROM HistorialServicio h
+        JOIN Equipo e ON h.numero_serie = e.numero_serie
+        JOIN AsignacionEquipo ae ON e.numero_serie = ae.numero_serie
+        JOIN Usuario u ON ae.rut_usuario = u.rut_usuario
+        JOIN Sucursal s ON u.id_sucursal = s.id_sucursal
+        JOIN Empresa emp ON s.id_empresa = emp.id_empresa
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        WHERE emp.nombre = 'Metso Minerals' AND c.nombre = 'Antofagasta'
+    """)
+    lista = cursor.fetchall()
+    db.close()
+    return lista
+
+def req9_equipos_sonda_metso_antofagasta():
+    db = conexion()
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    cursor.execute("""
+        SELECT e.numero_serie, e.marca, e.modelo, e.tipo_equipo
+        FROM HistorialServicio h
+        JOIN ServicioTecnico st ON h.servicio_tecnico = st.codigo
+        JOIN Equipo e ON h.numero_serie = e.numero_serie
+        JOIN AsignacionEquipo ae ON e.numero_serie = ae.numero_serie
+        JOIN Usuario u ON ae.rut_usuario = u.rut_usuario
+        JOIN Sucursal s ON u.id_sucursal = s.id_sucursal
+        JOIN Empresa emp ON s.id_empresa = emp.id_empresa
+        JOIN Ciudad c ON s.id_ciudad = c.id_ciudad
+        WHERE st.nombre_empresa = 'Sonda'
+          AND emp.nombre = 'Metso Minerals'
+          AND c.nombre = 'Antofagasta'
+    """)
+    lista = cursor.fetchall()
+    db.close()
+    return lista

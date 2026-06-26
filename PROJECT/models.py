@@ -1,25 +1,99 @@
+class Pais:
+    def __init__(self, codigo, nombre):
+        self.codigo = codigo
+        self.nombre = nombre
+    @staticmethod
+    def insert_sql():
+        return "INSERT INTO Pais (codigo, nombre) VALUES (%s, %s)"
+    @staticmethod
+    def select_sql():
+        return "SELECT * FROM Pais WHERE codigo=%s"
+
+class TipoEquipo:
+    def __init__(self, codigo, nombre):
+        self.codigo = codigo
+        self.nombre = nombre
+    @staticmethod
+    def insert_sql():
+        return "INSERT INTO TipoEquipo (codigo, nombre) VALUES (%s, %s)"
+    @staticmethod
+    def select_sql():
+        return "SELECT * FROM TipoEquipo WHERE codigo=%s"
+
+class Empresa:
+    def __init__(self, id_empresa, nombre):
+        self.id_empresa = id_empresa
+        self.nombre = nombre
+    @staticmethod
+    def insert_sql():
+        return "INSERT INTO Empresa (id_empresa, nombre) VALUES (%s, %s)"
+    @staticmethod
+    def select_sql():
+        return "SELECT * FROM Empresa WHERE id_empresa=%s"
+
+class Ciudad:
+    def __init__(self, id_ciudad, nombre, id_pais):
+        self.id_ciudad = id_ciudad
+        self.nombre = nombre
+        self.id_pais = id_pais
+    @staticmethod
+    def insert_sql():
+        return "INSERT INTO Ciudad (id_ciudad, nombre, id_pais) VALUES (%s, %s, %s)"
+    @staticmethod
+    def select_sql():
+        return "SELECT * FROM Ciudad WHERE id_ciudad=%s"
+
+class Area:
+    def __init__(self, codigo, nombre, id_empresa, id_gerente):
+        self.codigo = codigo
+        self.nombre = nombre
+        self.id_empresa = id_empresa
+        self.id_gerente = id_gerente
+    @staticmethod
+    def insert_sql():
+        return "INSERT INTO Area (codigo, nombre, id_empresa, id_gerente) VALUES (%s, %s, %s, %s)"
+    @staticmethod
+    def select_sql():
+        return "SELECT * FROM Area WHERE codigo=%s"
+
 class Usuario:
-    def __init__(self, rut_usuario, nombre, password, rol="empleado"):
+    def __init__(self, rut_usuario, nombre, password, rol="empleado", 
+                 apellido_paterno=None, apellido_materno=None, fecha_nacimiento=None,
+                 edad=None, direccion=None, anexo=None, email=None, celular=None, 
+                 id_area=None, oficina=None):
         self.rut_usuario = rut_usuario
         self.nombre = nombre
         self.password = password
         self.rol = rol
+        self.apellido_paterno = apellido_paterno
+        self.apellido_materno = apellido_materno
+        self.fecha_nacimiento = fecha_nacimiento
+        self.edad = edad
+        self.direccion = direccion
+        self.anexo = anexo
+        self.email = email
+        self.celular = celular
+        self.id_area = id_area
+        self.oficina = oficina
     @staticmethod
     def insert_sql():
-        return "INSERT INTO Usuario (rut_usuario, nombre, password, rol) VALUES (%s, %s, %s, %s)"
+        return """INSERT INTO Usuario (rut_usuario, nombre, password, rol, apellido_paterno, apellido_materno, fecha_nacimiento, edad, direccion, anexo, email, celular, id_area, oficina) 
+                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
     @staticmethod
     def select_sql():
         return "SELECT * FROM Usuario WHERE rut_usuario=%s"
 
 class Equipo:
-    def __init__(self, numero_serie, marca, modelo, tipo_equipo):
+    def __init__(self, numero_serie, marca, modelo, tipo_equipo, es_reemplazo=False, codigo_tipo_equipo=None):
         self.numero_serie = numero_serie
         self.marca = marca
         self.modelo = modelo
-        self.tipo_equipo = tipo_equipo
+        self.tipo_equipo = tipo_equipo # Legacy
+        self.es_reemplazo = es_reemplazo
+        self.codigo_tipo_equipo = codigo_tipo_equipo
     @staticmethod
     def insert_sql():
-        return "INSERT INTO Equipo (numero_serie, marca, modelo, tipo_equipo) VALUES (%s, %s, %s, %s)"
+        return "INSERT INTO Equipo (numero_serie, marca, modelo, tipo_equipo, es_reemplazo, codigo_tipo_equipo) VALUES (%s, %s, %s, %s, %s, %s)"
     @staticmethod
     def select_sql():
         return "SELECT * FROM Equipo WHERE numero_serie=%s"

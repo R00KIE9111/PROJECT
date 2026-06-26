@@ -1,10 +1,24 @@
+import os
 from flask import *
 from flask_wtf.csrf import CSRFProtect
 from gestion import *
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "kt7GphhcBsqf."
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "fallback_secret")
 csrf = CSRFProtect(app)
+
+@app.before_request
+def track_navigation():
+    # Evitar registrar recursos estáticos (CSS, JS, imágenes)
+    if request.endpoint and request.endpoint != 'static':
+        usuario_actual = session.get("usuario", "Invitado")
+        metodo = request.method
+        ruta = request.path
+        # Se registra la navegación en CosmosDB
+        registrar_evento(usuario_actual, "navegacion", f"Acceso a {ruta} vía {metodo}")
 
 @app.route("/")
 def index():
@@ -243,6 +257,21 @@ def mis_historiales_view():
         return redirect(url_for("login"))
     lista = mis_historiales(session["usuario"])
     return render_template("mis_historiales.html", historial=lista)
+
+@app.route("/reportes")
+def reportes():
+    # Retorna JSON con los 9 requerimientos del sistema
+    return jsonify({
+        "req1_notebooks_chile": req1_notebooks_chile(),
+        "req2_empleados_metso_antofagasta": req2_empleados_metso_antofagasta(),
+        "req3_celular_samsung_calama": req3_celular_samsung_calama(),
+        "req4_equipos_tony_stark": req4_equipos_tony_stark(),
+        "req5_cantidad_sucursales_metso_antofagasta": req5_cantidad_sucursales_metso_antofagasta(),
+        "req6_usuarios_mayores_50_bhp_informatica": req6_usuarios_mayores_50_bhp_informatica(),
+        "req7_empleados_bhp_ciudad": req7_empleados_bhp_ciudad("Antofagasta"), # Ejemplo: Antofagasta
+        "req8_equipos_servicio_metso_antofagasta": req8_equipos_servicio_metso_antofagasta(),
+        "req9_equipos_sonda_metso_antofagasta": req9_equipos_sonda_metso_antofagasta()
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
